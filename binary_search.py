@@ -26,7 +26,48 @@ def find_smallest_positive(xs):
     >>> find_smallest_positive([-3, -2, -1]) is None
     True
     '''
+    lo = 0
+    hi = len(xs) - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        if xs[mid] < 0:
+            lo = mid + 1
+        elif xs[mid] == 0:
+            return mid + 1 if mid + 1 < len(xs) and xs[mid + 1] > 0 else None
+        else:
+            hi = mid - 1
+    return 0 if xs[0] > 0 else None
 
+def _first(arr, x, n):
+    low = 0
+    high = n - 1
+    res = -1
+    while (low <= high):
+        mid = (low + high) // 2
+        if arr[mid] > x:
+            high = mid - 1
+        elif arr[mid] < x:
+            low = mid + 1
+        else:
+            res = mid
+            high = mid - 1
+    return res
+ 
+ 
+def _last(arr, x, n):
+    low = 0
+    high = n - 1
+    res = -1
+    while(low <= high):
+        mid = (low + high) // 2
+        if arr[mid] > x:
+            high = mid - 1
+        elif arr[mid] < x:
+            low = mid + 1
+        else:
+            res = mid
+            low = mid + 1
+    return res
 
 def count_repeats(xs, x):
     '''
@@ -52,7 +93,11 @@ def count_repeats(xs, x):
     >>> count_repeats([3, 2, 1], 4)
     0
     '''
-
+    n = len(xs)
+    if _first(xs, x, n) == -1:
+      return 0
+    else:
+      return _last(xs, x, n) - _first(xs, x, n) + 1
 
 def argmin(f, lo, hi, epsilon=1e-3):
     '''
@@ -87,7 +132,15 @@ def argmin(f, lo, hi, epsilon=1e-3):
     >>> argmin(lambda x: (x-5)**2, -20, 0)
     -0.00016935087808430278
     '''
-
+    if hi - lo < epsilon:
+        return (lo + hi) / 2
+    else:
+        m1 = lo + (hi - lo) / 3
+        m2 = hi - (hi - lo) / 3
+        if f(m1) < f(m2):
+            return argmin(f, lo, m2, epsilon)
+        else:
+            return argmin(f, m1, hi, epsilon)
 
 ################################################################################
 # the functions below are extra credit
@@ -109,7 +162,16 @@ def find_boundaries(f):
     else:
         you're done; return lo,hi
     '''
-
+    lo, hi = -1, 1
+    while f(hi) < f(lo):
+        lo, hi = hi, hi * 2
+    while hi - lo > 1e-9:
+        mid = (lo + hi) / 2
+        if f(mid - 1e-9) < f(mid + 1e-9):
+            hi = mid
+        else:
+            lo = mid
+    return lo, hi
 
 def argmin_simple(f, epsilon=1e-3):
     '''
