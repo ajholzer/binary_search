@@ -74,47 +74,58 @@ def count_repeats(xs, x):
     >>> count_repeats([3, 2, 1], 4)
     0
     '''
-
-    start = 0
-    end = len(xs) - 1
-
-    def _first(start, end):
-        mid = (start + end) // 2
-        if xs[mid] == x:
-            if mid == 0 or xs[mid - 1] > x:
-                return mid
-            else:
-                return _first(start, mid - 1)
-        if end == start:
-            return None
-        if x < xs[mid]:
-            return _first(mid + 1, end)
-        if x > xs[mid]:
-            return _first(start, mid - 1)
-
-    def _last(start, end):
-        mid = (start + end) // 2
-        if xs[mid] == x:
-            if mid == len(xs) - 1 or x > xs[mid + 1]:
-                return mid
-            else:
-                return _last(mid + 1, end)
-        if end == start:
-            return None
-        if x < xs[mid]:
-            return _last(mid + 1, end)
-        if x > xs[mid]:
-            return _last(start, mid - 1)
-
     if len(xs) == 0:
         return 0
-
-    a = _first(start, end)
-    b = _last(start, end)
-    if a is None or b is None:
+    if x not in xs:
         return 0
-    else:
-        return b - a + 1
+    
+    def _first(xs, x):
+        def go(start, end):
+            if start == end:
+                if xs[start] == x:
+                    return start
+                else:
+                    return None
+            mid = (start + end) // 2
+            if xs[mid] <= x:
+                end = mid
+                return go(start, end)
+            if xs[mid] > x:
+                start = mid + 1
+                return go(start, end)
+
+        if xs[0] == x:
+            return 0
+        elif xs[-1] > x:
+            return None
+        else:
+            return go(0, len(xs) - 1)
+
+    def _last(xs, x):
+        def go(start, end, hi):
+            if start == end:
+                if xs[start] == x:
+                    return start if start > hi else hi
+                else:
+                    return hi
+            mid = (start + end) // 2
+            if xs[mid] < x:
+                end = mid
+            if xs[mid] >= x:
+                start = mid + 1
+                hi = mid if xs[mid] == x else hi
+            return go(start, end, hi)
+        if xs[-1] == x:
+            return len(xs) - 1
+        elif xs[0] < x:
+            return None
+        else:
+            return go(0, len(xs) - 1, -1)
+
+    high = _last(xs, x)
+    low = _first(xs, x)
+
+    return high - low + 1
 
 
 def argmin(f, lo, hi, epsilon=1e-3):
